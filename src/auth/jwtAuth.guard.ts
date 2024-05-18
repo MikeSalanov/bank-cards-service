@@ -1,8 +1,13 @@
 import * as jwt from 'jsonwebtoken';
-import { Injectable, CanActivate, UnauthorizedException, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  UnauthorizedException,
+  ExecutionContext,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom } from 'rxjs';
 import DecodedJwtObjectInterface from '../interfaces/DecodedJwtObject.interface';
 import RequestWithUserIdInterface from '../interfaces/RequestWithUserId';
 
@@ -13,12 +18,15 @@ export class JwtAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest<Request>();
     const authHeader: string = request.headers.authorization;
-    if (!authHeader) throw new UnauthorizedException('Authorization header is missing.');
+    if (!authHeader)
+      throw new UnauthorizedException('Authorization header is missing.');
     const accessToken: string = authHeader.split(' ')[1];
     if (await this.validateToken(accessToken)) {
       const jwtDecodedObj: unknown = jwt.decode(accessToken);
       console.log(jwtDecodedObj);
-      (request as RequestWithUserIdInterface).user_id = (jwtDecodedObj as DecodedJwtObjectInterface).user_id;
+      (request as RequestWithUserIdInterface).user_id = (
+        jwtDecodedObj as DecodedJwtObjectInterface
+      ).user_id;
       return true;
     }
     throw new UnauthorizedException('Invalid access token');
@@ -27,12 +35,15 @@ export class JwtAuthGuard implements CanActivate {
   private async validateToken(token: string): Promise<boolean> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${process.env.AUTH_SERVICE_URL}/auth-service/token/validate`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        this.httpService.get(
+          `${process.env.AUTH_SERVICE_URL}/auth-service/token/validate`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        ),
       );
       return response.data.isValid;
-    } catch(err) {
+    } catch (err) {
       throw new UnauthorizedException('Error validating token.')
     }
   }
