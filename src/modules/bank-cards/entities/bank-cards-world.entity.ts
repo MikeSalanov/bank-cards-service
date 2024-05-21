@@ -14,17 +14,17 @@ export class BankCardsWorld {
   @Column('int')
   last_numbers: number;
 
-  @Column('string')
-  brand: string;
-
-  @Column('string')
+  @Column('varchar')
   exp_month: string;
 
-  @Column('string')
+  @Column('varchar')
   exp_year: string;
 
-  @Column('string')
+  @Column('varchar')
   payment_method_id: string;
+
+  @Column('uuid')
+  user_id: string;
 
   @CreateDateColumn()
   createdAt: Date;
